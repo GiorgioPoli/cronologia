@@ -95,11 +95,14 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
+            
+            /* MODIFICHE PER FISSARE L'ANNO IN ALTO */
             position: sticky;
-            top: 80px;
-            background: var(--bg);
-            padding: 10px 0;
+            top: 72px; /* Si aggancia subito sotto l'header blu della ricerca */
+            background: var(--bg); /* Sfondo pieno per non far vedere il testo che scorre sotto */
+            padding: 15px 0;
             z-index: 90;
+            border-bottom: 1px solid #ddd; /* Una sottile linea per staccarlo dai contenuti */
         }
 
         .btn-back {
