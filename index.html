@@ -25,11 +25,15 @@
         header {
             background: var(--primary);
             color: white;
-            padding: 1rem;
+            padding: 10px 15px;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 110; /* Sempre in primissimo piano */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            height: 100px; /* Altezza fissa per facilitare il calcolo del secondo blocco */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .search-container {
@@ -94,15 +98,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
             
-            /* MODIFICHE PER FISSARE L'ANNO IN ALTO */
             position: sticky;
-            top: 72px; /* Si aggancia subito sotto l'header blu della ricerca */
-            background: var(--bg); /* Sfondo pieno per non far vedere il testo che scorre sotto */
-            padding: 15px 0;
-            z-index: 90;
-            border-bottom: 1px solid #ddd; /* Una sottile linea per staccarlo dai contenuti */
+            top: 100px; /* Deve essere uguale all'altezza dell'header sopra */
+            background-color: var(--bg); /* Colore di sfondo uguale a quello del sito */
+            
+            padding: 10px 0;
+            margin: 0;
+            z-index: 100; /* Leggermente sotto l'header blu ma sopra le notizie */
+            border-bottom: 2px solid #ddd;
+            box-shadow: 0 4px 6px -6px #000; /* Ombra sottile per dare distacco */
         }
 
         .btn-back {
