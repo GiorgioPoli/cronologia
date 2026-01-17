@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cronologia Storica 1860-2025</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --bg: #f4f7f6;
+            --card: #ffffff;
+            --text: #333;
+            --highlight: #ffeb3b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        .btn-info {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #home-page { padding: 10px; }
+        
+        .years-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 12px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .year-card {
+            background: var(--card);
+            padding: 20px 5px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .year-card:hover { background: #eee; }
+        .year-card:active { transform: scale(0.95); }
+
+        #detail-page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: sticky;
+            top: 80px;
+            background: var(--bg);
+            padding: 10px 0;
+            z-index: 90;
+        }
+
+        .btn-back {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-nav {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ambito-section {
+            background: var(--card);
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--primary);
+        }
+
+        .ambito-title {
+            color: var(--accent);
+            margin-top: 0;
+            font-size: 1.3rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notizia-item {
+            margin: 12px 0;
+            line-height: 1.6;
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .notizia-item::before {
+            content: "• ";
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .highlight { background-color: var(--highlight); font-weight: bold; }
+
+        a.notizia-link {
+            color: var(--accent);
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 85%;
+            line-height: 1.6;
+        }
+
+        .timeline-indicator {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%; height: 6px;
+            background: #ddd;
+            z-index: 100;
+        }
+        #progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin:0">Cronologia 1860-2025</h2>
+        <button class="btn-info" onclick="toggleModal(true)">Info</button>
+    </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Cerca anno o testo (es. Garibaldi)..." oninput="handleSearch()">
+    </div>
+</header>
+
+<div id="home-page">
+    <div class="years-grid" id="yearsGrid"></div>
+</div>
+
+<div id="detail-page">
+    <div class="nav-header">
+        <button class="btn-back" onclick="showHome()">← Lista</button>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="btn-nav" onclick="navSuccessivo()" title="Anno precedente">◀</button>
+            <h1 id="displayYear" style="margin:0; min-width: 80px; text-align: center;"></h1>
+            <button class="btn-nav" onclick="navAnteriore()" title="Anno successivo">▶</button>
+        </div>
+        <div style="width: 60px"></div>
+    </div>
+    <div id="yearContent"></div>
+</div>
+
+<div class="modal" id="infoModal" onclick="toggleModal(false)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Archivio Cronologico</h3>
+        <p>I dati sono stati acquisiti con Gemini e ChatGPT, pertanto possono contennere errori - Utilizza la ricerca per filtrare gli anni o individuare termini specifici.</p>
+        <p><b>Navigazione:</b> Su PC usa le frecce della tastiera. Su mobile scorri orizzontalmente.</p>
+        <p><b>Link:</b> I collegamenti esterni si aprono in una nuova scheda.</p>
+        <button class="btn-back" onclick="toggleModal(false)">Ho capito</button>
+    </div>
+</div>
+
+<div class="timeline-indicator"><div id="progress-bar"></div></div>
+
+<script>
+    let db = [];
+    let currentResults = [];
+    let currentIndex = -1;
+    let searchTerm = "";
+
+    const iconeAmbiti = {
+        "Sintesi": "📝", "Italia": "🇮🇹", "Europa": "🇪🇺", 
+        "Resto del mondo": "🌎", "Scienza e tecnologia": "🔬", 
+        "Medicina": "🧬", "Cultura": "🎨", "Sport": "🏆"
+    };
+
+    fetch('dati_cronologia.json')
+        .then(response => response.json())
+        .then(data => {
+            db = data;
+            currentResults = db;
+            renderYearsGrid(db);
+            checkHash();
+        });
+
+    function renderYearsGrid(years) {
+        const grid = document.getElementById('yearsGrid');
+        grid.innerHTML = years.map(item => `
+            <div class="year-card" onclick="showYear(${item.anno})">${item.anno}</div>
+        `).join('');
+    }
+
+    function handleSearch() {
+        searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        if (searchTerm.length < 2) {
+            currentResults = db;
+        } else {
+            currentResults = db.filter(entry => {
+                const yearStr = entry.anno.toString();
+                const contentStr = JSON.stringify(entry.ambiti).toLowerCase();
+                return yearStr.includes(searchTerm) || contentStr.includes(searchTerm);
+            });
+        }
+        renderYearsGrid(currentResults);
+    }
+
+    function showYear(year) {
+        currentIndex = currentResults.findIndex(e => e.anno === year);
+        const data = currentResults[currentIndex];
+        if (!data) return;
+
+        document.getElementById('home-page').style.display = 'none';
+        document.getElementById('detail-page').style.display = 'block';
+        document.getElementById('displayYear').innerText = data.anno;
+        window.location.hash = year;
+
+        let html = "";
+        const ordine = ["Sintesi", "Italia", "Europa", "Resto del mondo", "Scienza e tecnologia", "Medicina", "Cultura", "Sport"];
+        
+        ordine.forEach(amb => {
+            if (data.ambiti[amb] && data.ambiti[amb].length > 0) {
+                html += `<div class="ambito-section">
+                    <h3 class="ambito-title">${iconeAmbiti[amb] || ''} ${amb}</h3>
+                    ${data.ambiti[amb].map(n => {
+                        let text = processText(n);
+                        return `<p class="notizia-item">${highlightText(text, searchTerm)}</p>`;
+                    }).join('')}
+                </div>`;
+            }
+        });
+        
+        document.getElementById('yearContent').innerHTML = html;
+        updateProgressBar();
+        window.scrollTo(0,0);
+    }
+
+    // Funzione per Link (Markdown e URL nudi)
+    function processText(text) {
+        // 1. Gestione Markdown [Nome](Link)
+        text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" class="notizia-link" target="_blank" rel="noopener">$1</a>');
+        
+        // 2. Gestione URL nudi (solo se non già trasformati in tag <a>)
+        const urlPattern = /(?<!href=")(https?:\/\/[^\s<]+)/gi;
+        return text.replace(urlPattern, '<a href="$1" class="notizia-link" target="_blank" rel="noopener">$1</a>');
+    }
+
+    function highlightText(text, query) {
+        if (!query || query.length < 2) return text;
+        const reg = new RegExp(`(${query})`, "gi");
+        // Evitiamo di evidenziare all'interno dei tag HTML
+        return text.split(/(<[^>]*>)/).map(part => {
+            if (part.startsWith('<')) return part;
+            return part.replace(reg, '<span class="highlight">$1</span>');
+        }).join('');
+    }
+
+    function showHome() {
+        document.getElementById('home-page').style.display = 'block';
+        document.getElementById('detail-page').style.display = 'none';
+        window.location.hash = "";
+    }
+
+    function navAnteriore() { // Vai all'anno successivo cronologico (indice diminuisce)
+        if (currentIndex > 0) showYear(currentResults[currentIndex - 1].anno);
+    }
+
+    function navSuccessivo() { // Vai all'anno precedente cronologico (indice aumenta)
+        if (currentIndex < currentResults.length - 1) showYear(currentResults[currentIndex + 1].anno);
+    }
+
+    // Swipe e Tastiera
+    document.addEventListener('keydown', e => {
+        if (document.getElementById('detail-page').style.display === 'none') return;
+        if (e.key === "ArrowLeft") navAnteriore();
+        if (e.key === "ArrowRight") navSuccessivo();
+    });
+
+    let touchstartX = 0;
+    document.addEventListener('touchstart', e => touchstartX = e.changedTouches[0].screenX);
+    document.addEventListener('touchend', e => {
+        if (document.getElementById('detail-page').style.display === 'none') return;
+        let x = e.changedTouches[0].screenX;
+        if (x < touchstartX - 60) navSuccessivo();
+        if (x > touchstartX + 60) navAnteriore();
+    });
+
+    function updateProgressBar() {
+        // Calcola progresso basato sulla posizione nell'intero DB (da 1860 a 2025)
+        const total = db.length;
+        const currentYear = currentResults[currentIndex].anno;
+        const pos = db.findIndex(e => e.anno === currentYear);
+        const prog = ((total - pos) / total) * 100;
+        document.getElementById('progress-bar').style.width = prog + "%";
+    }
+
+    function toggleModal(s) { document.getElementById('infoModal').style.display = s ? 'flex' : 'none'; }
+    function checkHash() {
+        const h = window.location.hash.replace('#', '');
+        if (h && !isNaN(h)) showYear(parseInt(h));
+    }
+    window.onpopstate = () => { if (!window.location.hash) showHome(); else checkHash(); };
+</script>
+
+</body>
+</html>
